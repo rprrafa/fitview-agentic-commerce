@@ -254,6 +254,28 @@ main{
   transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;
 }
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* ── ERROR STATE ── */
+#s4.has-error .result-badge{display:none}
+#s4.has-error .metrics-row{display:none}
+#s4.has-error .btn-primary{display:none}
+.error-img-wrap{
+  width:100%;border-radius:12px;overflow:hidden;
+  border:1px solid rgba(232,25,60,.25);background:#130509;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px;gap:16px;text-align:center;
+}
+.error-img-wrap svg{opacity:.7}
+.error-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--red)}
+.error-msg{font-size:13px;color:var(--muted);max-width:340px;line-height:1.6}
+.error-code{font-size:10px;color:#444;font-family:monospace;background:#0d0d0d;padding:6px 12px;border-radius:4px;max-width:100%;overflow:auto;word-break:break-all}
+.btn-retry{
+  background:linear-gradient(135deg,var(--red),#c0102c);border:none;color:#fff;
+  padding:13px 28px;border-radius:8px;font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;
+  transition:all .25s;margin-top:4px;
+}
+.btn-retry:hover{filter:brightness(1.1);transform:translateY(-1px)}
+
 
 @media (max-width:480px){
   .logo-ai{font-size:22px}
@@ -412,19 +434,37 @@ main{
   <!-- ── SCREEN 4: RESULT ── -->
   <div class="screen" id="s4">
     <div class="result-header">
-      <p class="result-title">✦ Seu look gerado</p>
+      <p class="result-title" id="resultTitle">✦ Seu look gerado</p>
       <div class="result-actions">
         <button class="btn-outline" onclick="reiniciar()">← Nova peça</button>
         <button class="btn-primary" onclick="showToast('✅ Adicionado ao carrinho!')">Adicionar ao Carrinho</button>
       </div>
     </div>
 
-    <div class="result-img-wrap">
+    <!-- success state -->
+    <div class="result-img-wrap" id="resultImgWrap">
       <img id="resultImg" src="" alt="Resultado"/>
       <div class="result-badge">✦ IA Gerada</div>
     </div>
 
-    <div class="metrics-row">
+    <!-- error state (hidden by default) -->
+    <div class="error-img-wrap" id="errorWrap" style="display:none">
+      <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="36" cy="36" r="35" stroke="#e8193c" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <path d="M36 22v18" stroke="#e8193c" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="36" cy="48" r="2" fill="#e8193c"/>
+        <path d="M24 24l24 24M48 24L24 48" stroke="#e8193c" stroke-width="1.5" stroke-linecap="round" opacity=".3"/>
+      </svg>
+      <p class="error-title">Ops, algo deu errado</p>
+      <p class="error-msg">Não foi possível gerar o try-on. Verifique o token, a conexão com o proxy local e tente novamente.</p>
+      <p class="error-code" id="errorCode"></p>
+      <button class="btn-retry" onclick="tentarNovamente()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12.5 2.5A6.5 6.5 0 1 0 13 7" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M10 2.5h2.5V5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Tentar novamente
+      </button>
+    </div>
+
+    <div class="metrics-row" id="metricsRow">
       <div class="metric" id="m1"><div class="metric-val">-40%</div><div class="metric-lbl">Devoluções estimadas</div></div>
       <div class="metric" id="m2"><div class="metric-val">+32%</div><div class="metric-lbl">Confiança na compra</div></div>
       <div class="metric" id="m3"><div class="metric-val">+28%</div><div class="metric-lbl">Ticket médio</div></div>
@@ -575,11 +615,13 @@ function loadPhoto(file) {
 /* ── LOADING ANIMATION (desacoplada da API) ── */
 let animDone = false;
 let apiResult = null;
+let lastError = null;
 
 function iniciarGeracao() {
   goTo('s3');
   animDone = false;
   apiResult = null;
+  lastError = null;
   ['t1','t2','t3','t4'].forEach(id => document.getElementById(id).classList.remove('on'));
   document.getElementById('progFill').style.width = '0';
 
@@ -591,7 +633,7 @@ function iniciarGeracao() {
     const elapsed = now - start;
     // Vai até 90% durante ANIM_DURATION, depois congela até apiResult chegar
     const raw = Math.min(elapsed / ANIM_DURATION, 0.9);
-    const pct = apiResult ? 100 : raw * 100;
+    const pct = (apiResult || lastError) ? 100 : raw * 100;
 
     document.getElementById('progFill').style.width = pct + '%';
     const si = Math.min(Math.floor(pct / 17), STEPS.length - 1);
@@ -602,7 +644,7 @@ function iniciarGeracao() {
 
     if (pct >= 100) {
       animDone = true;
-      mostrarResultado();
+      if (apiResult || lastError) mostrarResultado();
     } else {
       requestAnimationFrame(tick);
     }
@@ -711,8 +753,8 @@ async function chamadaReplicate() {
 
   } catch (err) {
     console.error('Replicate error:', err);
-    showToast('⚠️ ' + err.message + ' — usando resultado mockado');
-    apiResult = 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800&h=1000&fit=crop';
+    lastError = err.message || 'Erro desconhecido';
+    mostrarResultado();
   }
 }
 
@@ -732,15 +774,40 @@ async function pollPrediction(url, maxAttempts = 30) {
 }
 
 /* ── RESULT ── */
+let lastError = null;
+
 function mostrarResultado() {
-  if (!apiResult) return; // aguarda API ainda
-  document.getElementById('resultImg').src = apiResult;
+  if (!apiResult && !lastError) return; // aguarda API ainda
+
+  if (lastError) {
+    // show error state
+    document.getElementById('resultTitle').textContent = '✕ Falha na geração';
+    document.getElementById('resultImgWrap').style.display = 'none';
+    document.getElementById('metricsRow').style.display = 'none';
+    document.getElementById('errorCode').textContent = lastError;
+    document.getElementById('errorWrap').style.display = 'flex';
+  } else {
+    // show success state
+    document.getElementById('resultTitle').textContent = '✦ Seu look gerado';
+    document.getElementById('resultImgWrap').style.display = '';
+    document.getElementById('metricsRow').style.display = '';
+    document.getElementById('errorWrap').style.display = 'none';
+    document.getElementById('resultImg').src = apiResult;
+    setTimeout(() => {
+      ['m1','m2','m3'].forEach((id, i) =>
+        setTimeout(() => document.getElementById(id).classList.add('on'), i * 150)
+      );
+    }, 300);
+  }
+
   goTo('s4');
-  setTimeout(() => {
-    ['m1','m2','m3'].forEach((id, i) =>
-      setTimeout(() => document.getElementById(id).classList.add('on'), i * 150)
-    );
-  }, 300);
+}
+
+function tentarNovamente() {
+  lastError = null;
+  apiResult = null;
+  ['m1','m2','m3'].forEach(id => document.getElementById(id).classList.remove('on'));
+  iniciarGeracao();
 }
 
 /* ── RESET ── */
@@ -750,6 +817,7 @@ function reiniciar() {
   userPhotoBase64 = '';
   animDone = false;
   apiResult = null;
+  lastError = null;
   ['m1','m2','m3'].forEach(id => document.getElementById(id).classList.remove('on'));
   document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('btnS1').disabled = true;
