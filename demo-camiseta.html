@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Agentic Commerce · Demo 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d0d0d;
+  --s1:#141414;
+  --s2:#1c1c1c;
+  --s3:#242424;
+  --border:rgba(255,255,255,.07);
+  --red:#e8193c;
+  --red-dim:rgba(232,25,60,.10);
+  --white:#f4f4f4;
+  --muted:#888;
+  --green:#3ddc84;
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;overflow:hidden}
+
+/* HEADER */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(13,13,13,.92);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  padding:0 52px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-ai{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--red);letter-spacing:-1px}
+.logo-div{width:1px;height:28px;background:rgba(255,255,255,.13)}
+.logo-r{display:flex;flex-direction:column;line-height:1.2}
+.logo-startse{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
+.logo-brand{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
+.demo-badge{
+  background:var(--red-dim);border:1px solid rgba(232,25,60,.3);
+  color:var(--red);padding:4px 14px;border-radius:4px;
+  font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:7px;
+}
+.pulse{width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+
+/* STEP INDICATOR */
+.steps-bar{
+  position:fixed;top:64px;left:0;right:0;z-index:90;
+  background:rgba(13,13,13,.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 52px;height:44px;
+  display:flex;align-items:center;gap:0;
+}
+.step-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:.5px;
+  color:var(--muted);transition:color .3s;padding-right:24px;
+  text-transform:uppercase;
+}
+.step-item.active{color:var(--white)}
+.step-item.done{color:var(--green)}
+.step-num{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--s3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;color:var(--muted);
+  transition:all .3s;flex-shrink:0;
+}
+.step-item.active .step-num{background:var(--red);border-color:var(--red);color:#fff}
+.step-item.done .step-num{background:var(--green);border-color:var(--green);color:#000}
+.step-arrow{color:var(--s3);font-size:12px;margin-right:24px;transition:color .3s}
+.step-arrow.done{color:var(--green)}
+
+/* MAIN */
+main{
+  height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:124px 52px 40px;
+}
+
+/* ── SCREEN SYSTEM ── */
+.screen{
+  position:absolute;width:100%;max-width:780px;
+  display:flex;flex-direction:column;align-items:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .45s;
+}
+.screen.active{opacity:1;pointer-events:all;position:relative}
+
+/* ── SCREEN 1: ESCOLHER PRODUTO ── */
+#s1{gap:24px}
+.screen-eyebrow{
+  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--red);display:flex;align-items:center;gap:8px;align-self:flex-start;
+}
+.screen-eyebrow::before{content:'';width:18px;height:1px;background:var(--red)}
+.screen-title{
+  font-family:'Syne',sans-serif;font-size:36px;font-weight:800;
+  letter-spacing:-1px;line-height:1.05;align-self:flex-start;
+}
+.screen-title span{color:var(--red)}
+.screen-sub{font-size:14px;color:var(--muted);align-self:flex-start;line-height:1.6}
+
+/* product cards */
+.products-row{display:flex;gap:20px;width:100%}
+.product-card{
+  flex:1;border:2px solid var(--border);border-radius:14px;
+  overflow:hidden;cursor:pointer;background:var(--s2);
+  transition:all .25s;position:relative;
+}
+.product-card:hover{border-color:rgba(232,25,60,.4);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.product-card.selected{border-color:var(--red);box-shadow:0 0 0 1px var(--red),0 12px 32px rgba(232,25,60,.2)}
+.product-card img{width:100%;height:280px;object-fit:cover;display:block;background:#f2f2f2}
+.product-card-body{padding:16px 18px}
+.product-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px}
+.product-price{font-size:13px;color:var(--muted)}
+.product-check{
+  position:absolute;top:12px;right:12px;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--red);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:#fff;
+  opacity:0;transform:scale(.7);transition:all .2s;
+}
+.product-card.selected .product-check{opacity:1;transform:scale(1)}
+
+/* ── SCREEN 2: UPLOAD FOTO ── */
+#s2{gap:24px}
+.selected-product-bar{
+  width:100%;display:flex;align-items:center;gap:14px;
+  padding:12px 18px;border-radius:10px;
+  background:var(--s2);border:1px solid var(--border);
+}
+.selected-product-bar img{width:48px;height:48px;object-fit:cover;border-radius:8px;background:#f2f2f2}
+.selected-product-bar-txt h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.selected-product-bar-txt p{font-size:11px;color:var(--muted)}
+.selected-product-bar-change{
+  margin-left:auto;background:transparent;border:1px solid var(--border);
+  color:var(--muted);padding:6px 12px;border-radius:6px;font-size:11px;
+  font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;
+}
+.selected-product-bar-change:hover{border-color:var(--red);color:var(--red)}
+
+.uzone{
+  width:100%;border:2px dashed rgba(232,25,60,.22);border-radius:12px;
+  padding:44px 32px;text-align:center;cursor:pointer;
+  background:rgba(232,25,60,.02);transition:all .25s;
+}
+.uzone:hover,.uzone.drag{border-color:rgba(232,25,60,.5);background:rgba(232,25,60,.05)}
+.uzone-icon{font-size:36px;margin-bottom:12px}
+.uzone h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:5px}
+.uzone p{font-size:13px;color:var(--muted)}
+#fi{display:none}
+
+.upreview{display:none;width:100%}
+.upreview.show{display:block}
+.upreview-inner{border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;background:var(--s2)}
+.upreview-inner img{width:100%;max-height:260px;object-fit:contain;display:block}
+.upreview-change{
+  position:absolute;top:12px;right:12px;
+  background:rgba(13,13,13,.75);backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.15);color:var(--white);
+  padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;
+}
+.upreview-change:hover{background:rgba(13,13,13,.9)}
+
+/* buttons */
+.btn-row{display:flex;gap:12px;width:100%}
+.btn-back{
+  background:transparent;border:1px solid var(--border);color:var(--white);
+  padding:14px 24px;border-radius:8px;font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;
+}
+.btn-back:hover{border-color:var(--muted)}
+.btn-next{
+  flex:1;background:linear-gradient(135deg,var(--red),#c0102c);border:none;color:#fff;
+  padding:14px 24px;border-radius:8px;font-family:'Inter',sans-serif;
+  font-size:15px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all .25s;
+}
+.btn-next:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,25,60,.3)}
+.btn-next:disabled{opacity:.3;cursor:not-allowed;transform:none}
+
+/* ── SCREEN 3: LOADING ── */
+#s3{gap:28px;justify-content:center;padding-top:20px}
+.spin-wrap{width:88px;height:88px;position:relative}
+.lring{
+  position:absolute;inset:0;border-radius:50%;
+  border:2.5px solid transparent;border-top-color:var(--red);
+  animation:spin .9s linear infinite;
+}
+.lring2{inset:12px;border-top-color:rgba(232,25,60,.35);animation-duration:1.5s;animation-direction:reverse}
+.lring3{inset:24px;border-top-color:rgba(232,25,60,.15);animation-duration:2.2s}
+.lcenter{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--red);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700}
+.loading-step{font-size:13px;color:var(--muted);min-height:20px}
+.prog-wrap{width:260px;height:2px;background:var(--s3);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;background:var(--red);border-radius:100px;width:0}
+.loading-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ltag{padding:4px 12px;border-radius:100px;border:1px solid var(--border);font-size:11px;color:#444;transition:all .3s}
+.ltag.on{border-color:rgba(232,25,60,.5);color:var(--red);background:rgba(232,25,60,.07)}
+
+/* ── SCREEN 4: RESULT ── */
+#s4{gap:18px}
+.result-header{display:flex;align-items:center;justify-content:space-between;width:100%}
+.result-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.result-actions{display:flex;gap:10px}
+.btn-outline{
+  background:transparent;border:1px solid var(--border);color:var(--white);
+  padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;
+}
+.btn-outline:hover{border-color:var(--red);color:var(--red)}
+.btn-primary{
+  background:var(--red);border:1px solid var(--red);color:#fff;
+  padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.btn-primary:hover{filter:brightness(1.1)}
+
+.result-img-wrap{
+  width:100%;border-radius:12px;overflow:hidden;
+  border:1px solid var(--border);background:var(--s2);position:relative;
+}
+.result-img-wrap img{width:100%;max-height:400px;object-fit:contain;display:block}
+.result-badge{
+  position:absolute;top:14px;right:14px;
+  background:rgba(13,13,13,.75);backdrop-filter:blur(8px);
+  border:1px solid rgba(61,220,132,.3);color:var(--green);
+  padding:5px 14px;border-radius:6px;font-size:11px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;
+}
+
+.metrics-row{display:flex;gap:12px;width:100%}
+.metric{
+  flex:1;background:var(--s1);border:1px solid var(--border);
+  border-radius:10px;padding:14px 18px;
+  display:flex;flex-direction:column;gap:3px;
+  opacity:0;transform:translateY(8px);transition:all .4s;
+}
+.metric.on{opacity:1;transform:translateY(0);border-color:rgba(232,25,60,.25);background:rgba(232,25,60,.04)}
+.metric-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--red)}
+.metric-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+
+/* toast */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--s2);border:1px solid rgba(255,255,255,.13);
+  padding:10px 22px;border-radius:8px;font-size:13px;font-weight:500;
+  z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.5);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-ai">AI</span>
+    <div class="logo-div"></div>
+    <div class="logo-r">
+      <span class="logo-startse">.StartSe ›</span>
+      <span class="logo-brand">Agentic Commerce</span>
+    </div>
+  </div>
+  <div class="demo-badge"><span class="pulse"></span>Demo 1 · FitView</div>
+</header>
+
+<!-- STEPS BAR -->
+<div class="steps-bar">
+  <div class="step-item active" id="si1">
+    <div class="step-num">1</div>
+    Escolha o produto
+  </div>
+  <div class="step-arrow" id="sa1">›</div>
+  <div class="step-item" id="si2">
+    <div class="step-num">2</div>
+    Sua foto
+  </div>
+  <div class="step-arrow" id="sa2">›</div>
+  <div class="step-item" id="si3">
+    <div class="step-num">3</div>
+    Resultado
+  </div>
+</div>
+
+<main>
+
+  <!-- ── SCREEN 1: PRODUTO ── -->
+  <div class="screen active" id="s1">
+    <div class="screen-eyebrow">✦ Virtual Try-On</div>
+    <h1 class="screen-title">Escolha o produto<br/>que quer <span>experimentar.</span></h1>
+    <p class="screen-sub">Selecione uma peça do catálogo para começar o try-on com IA generativa.</p>
+
+    <div class="products-row">
+      <div class="product-card" id="pc0" onclick="selectProduct(0)">
+        <div class="product-check">✓</div>
+        <img src="images/camiseta-agentic-commerce.png" alt="Camiseta Agentic Commerce"/>
+        <div class="product-card-body">
+          <div class="product-name">Camiseta Agentic Commerce</div>
+          <div class="product-price">R$ 129,00 · Branca · S ao XL</div>
+        </div>
+      </div>
+      <div class="product-card" id="pc1" onclick="selectProduct(1)">
+        <div class="product-check">✓</div>
+        <img src="images/camiseta-rede-neural.png" alt="Camiseta Rede Neural"/>
+        <div class="product-card-body">
+          <div class="product-name">Camiseta Rede Neural</div>
+          <div class="product-price">R$ 159,00 · Preta · S ao XL</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-next" id="btnS1" onclick="goToUpload()" disabled>
+        <span style="font-size:16px">✦</span> Continuar com esta peça
+      </button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 2: UPLOAD ── -->
+  <div class="screen" id="s2">
+    <!-- selected product mini bar -->
+    <div class="selected-product-bar" id="selectedBar">
+      <img id="selectedThumb" src="" alt=""/>
+      <div class="selected-product-bar-txt">
+        <h4 id="selectedName">—</h4>
+        <p>Produto selecionado</p>
+      </div>
+      <button class="selected-product-bar-change" onclick="goTo('s1')">← Trocar</button>
+    </div>
+
+    <div class="screen-eyebrow">✦ Passo 2 de 2</div>
+    <h1 class="screen-title">Agora envie<br/><span>uma foto sua.</span></h1>
+    <p class="screen-sub">A IA vai vestir a peça em você e gerar o resultado.</p>
+
+    <div class="uzone" id="uz"
+         onclick="document.getElementById('fi').click()"
+         ondragover="event.preventDefault();this.classList.add('drag')"
+         ondrop="handleDrop(event)"
+         ondragleave="this.classList.remove('drag')">
+      <div class="uzone-icon">🤳</div>
+      <h2>Upload da sua foto</h2>
+      <p>JPG ou PNG · corpo inteiro ou meio corpo · arraste ou clique</p>
+      <input type="file" id="fi" accept="image/*" onchange="handleFile(event)"/>
+    </div>
+
+    <div class="upreview" id="upreview">
+      <div class="upreview-inner">
+        <img id="upreview-img" src="" alt="preview"/>
+        <button class="upreview-change" onclick="document.getElementById('fi').click()">✎ Trocar foto</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goTo('s1')">← Voltar</button>
+      <button class="btn-next" id="btnS2" onclick="iniciarGeracao()" disabled>
+        <span style="font-size:16px">✦</span> Gerar Try-On com IA
+      </button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 3: LOADING ── -->
+  <div class="screen" id="s3" style="gap:28px;justify-content:center">
+    <div class="spin-wrap">
+      <div class="lring"></div>
+      <div class="lring lring2"></div>
+      <div class="lring lring3"></div>
+      <div class="lcenter">AI</div>
+    </div>
+    <p class="loading-title">Gerando seu look…</p>
+    <p class="loading-step" id="loadingStep">Analisando produto</p>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+    <div class="loading-tags">
+      <span class="ltag" id="t1">Detectando corpo</span>
+      <span class="ltag" id="t2">Ajustando peça</span>
+      <span class="ltag" id="t3">Renderizando look</span>
+      <span class="ltag" id="t4">Finalizando</span>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 4: RESULT ── -->
+  <div class="screen" id="s4">
+    <div class="result-header">
+      <p class="result-title">✦ Seu look gerado</p>
+      <div class="result-actions">
+        <button class="btn-outline" onclick="reiniciar()">← Nova peça</button>
+        <button class="btn-primary" onclick="showToast('✅ Adicionado ao carrinho!')">Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <div class="result-img-wrap">
+      <img id="resultImg" src="" alt="Resultado"/>
+      <div class="result-badge">✦ IA Gerada</div>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric" id="m1"><div class="metric-val">-40%</div><div class="metric-lbl">Devoluções estimadas</div></div>
+      <div class="metric" id="m2"><div class="metric-val">+32%</div><div class="metric-lbl">Confiança na compra</div></div>
+      <div class="metric" id="m3"><div class="metric-val">+28%</div><div class="metric-lbl">Ticket médio</div></div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<style>
+/* TOKEN MODAL */
+.token-modal-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+}
+.token-modal{
+  background:#141414;border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:36px 40px;width:100%;max-width:440px;
+  display:flex;flex-direction:column;gap:18px;
+  box-shadow:0 24px 64px rgba(0,0,0,.6);
+}
+.token-modal h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.token-modal p{font-size:13px;color:#888;line-height:1.6}
+.token-input{
+  width:100%;background:#0d0d0d;border:1px solid rgba(255,255,255,.1);
+  color:#f4f4f4;padding:12px 16px;border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:13px;
+  outline:none;transition:border-color .2s;
+}
+.token-input:focus{border-color:rgba(232,25,60,.5)}
+.token-btn{
+  background:linear-gradient(135deg,#e8193c,#c0102c);border:none;color:#fff;
+  padding:12px;border-radius:8px;font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;transition:filter .2s;
+}
+.token-btn:hover{filter:brightness(1.1)}
+.token-skip{
+  background:transparent;border:1px solid rgba(255,255,255,.1);color:#666;
+  padding:10px;border-radius:8px;font-family:'Inter',sans-serif;
+  font-size:12px;cursor:pointer;transition:all .2s;
+}
+.token-skip:hover{border-color:#666;color:#f4f4f4}
+</style>
+
+<!-- TOKEN MODAL -->
+<div class="token-modal-overlay" id="tokenModal">
+  <div class="token-modal">
+    <h2>🔑 Replicate API Token</h2>
+    <p>Para gerar a imagem real com o modelo <strong style="color:#e8193c">google/nano-banana-pro</strong>, insira seu token da API do Replicate.</p>
+    <input class="token-input" id="tokenInput" type="password"
+           placeholder="r8_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+    <button class="token-btn" onclick="confirmarToken()">Confirmar e iniciar demo</button>
+    <button class="token-skip" onclick="usarMockado()">Continuar sem token (modo demonstração)</button>
+  </div>
+</div>
+
+<script>
+/* ── CONFIG ── */
+let REPLICATE_TOKEN = '';
+let useMock = false;
+
+const PRODUCTS = [
+  {
+    name: "Camiseta Agentic Commerce",
+    thumb: "images/camiseta-agentic-commerce.png",
+    prompt: "A person wearing a white t-shirt with 'Agentic Commerce' tech branding, modern lifestyle photo, clean background, fashion catalog style, high quality, photorealistic"
+  },
+  {
+    name: "Camiseta Rede Neural",
+    thumb: "images/camiseta-rede-neural.png",
+    prompt: "A person wearing a black t-shirt with neural network graphic design, modern streetwear style, fashion catalog photo, clean background, high quality, photorealistic"
+  },
+];
+
+const STEPS = [
+  ['Analisando proporções do corpo…', 't1'],
+  ['Detectando posição e pose…',      't1'],
+  ['Ajustando peça ao corpo…',        't2'],
+  ['Renderizando textura e luz…',     't3'],
+  ['Aplicando sombras e dobras…',     't3'],
+  ['Finalizando imagem…',             't4'],
+];
+
+/* ── TOKEN — lê da URL (?token=r8_xxx) ou do modal ── */
+(function() {
+  const t = new URLSearchParams(window.location.search).get('token');
+  if (t) {
+    REPLICATE_TOKEN = t;
+    document.getElementById('tokenModal').remove();
+  }
+})();
+
+function confirmarToken() {
+  const val = document.getElementById('tokenInput').value.trim();
+  if (!val) { showToast('⚠️ Insira o token antes de continuar'); return; }
+  REPLICATE_TOKEN = val;
+  document.getElementById('tokenModal').remove();
+}
+
+function usarMockado() {
+  useMock = true;
+  document.getElementById('tokenModal').remove();
+}
+
+/* ── PRODUCT SELECTION ── */
+let selectedProduct = -1;
+let userPhotoLoaded = false;
+let userPhotoBase64 = '';
+
+function selectProduct(i) {
+  selectedProduct = i;
+  document.querySelectorAll('.product-card').forEach((c, idx) =>
+    c.classList.toggle('selected', idx === i)
+  );
+  document.getElementById('btnS1').disabled = false;
+}
+
+function goToUpload() {
+  const p = PRODUCTS[selectedProduct];
+  document.getElementById('selectedThumb').src = p.thumb;
+  document.getElementById('selectedName').textContent = p.name;
+  goTo('s2');
+}
+
+/* ── FILE UPLOAD ── */
+function handleFile(e) { if (e.target.files[0]) loadPhoto(e.target.files[0]); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uz').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadPhoto(f);
+}
+function loadPhoto(file) {
+  const r = new FileReader();
+  r.onload = ev => {
+    userPhotoBase64 = ev.target.result; // full data URI
+    document.getElementById('upreview-img').src = userPhotoBase64;
+    document.getElementById('upreview').classList.add('show');
+    document.getElementById('uz').style.display = 'none';
+    userPhotoLoaded = true;
+    document.getElementById('btnS2').disabled = false;
+  };
+  r.readAsDataURL(file);
+}
+
+/* ── LOADING ANIMATION (desacoplada da API) ── */
+let animDone = false;
+let apiResult = null;
+
+function iniciarGeracao() {
+  goTo('s3');
+  animDone = false;
+  apiResult = null;
+  ['t1','t2','t3','t4'].forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById('progFill').style.width = '0';
+
+  // Animação: progride até 90% em 4s e congela até API responder
+  const start = performance.now();
+  const ANIM_DURATION = 4000;
+
+  function tick(now) {
+    const elapsed = now - start;
+    // Vai até 90% durante ANIM_DURATION, depois congela até apiResult chegar
+    const raw = Math.min(elapsed / ANIM_DURATION, 0.9);
+    const pct = apiResult ? 100 : raw * 100;
+
+    document.getElementById('progFill').style.width = pct + '%';
+    const si = Math.min(Math.floor(pct / 17), STEPS.length - 1);
+    document.getElementById('loadingStep').textContent = STEPS[si][0];
+    ['t1','t2','t3','t4'].forEach((id, i) => {
+      if (pct >= i * 25) document.getElementById(id).classList.add('on');
+    });
+
+    if (pct >= 100) {
+      animDone = true;
+      mostrarResultado();
+    } else {
+      requestAnimationFrame(tick);
+    }
+  }
+  requestAnimationFrame(tick);
+
+  // Dispara API ou mock em paralelo
+  if (useMock || !REPLICATE_TOKEN) {
+    chamadaMock();
+  } else {
+    chamadaReplicate();
+  }
+}
+
+/* ── MOCK (sem token) ── */
+function chamadaMock() {
+  setTimeout(() => {
+    apiResult = 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800&h=1000&fit=crop';
+  }, 3500);
+}
+
+/* ── API REPLICATE ── */
+async function chamadaReplicate() {
+  const produto = PRODUCTS[selectedProduct];
+
+  // Monta prompt enriquecido com a foto do usuário como contexto visual
+  const promptFinal = `Virtual try-on fashion photo. ${produto.prompt}. Studio lighting, high resolution, 4K, fashion magazine quality.`;
+
+  try {
+    const body = {
+      input: {
+        prompt: promptFinal,
+        aspect_ratio: "3:4",
+        output_format: "png"
+      }
+    };
+
+    // Inclui a foto do usuário se o modelo aceitar (image-to-image)
+    if (userPhotoBase64) {
+      body.input.image = userPhotoBase64;
+    }
+
+    const res = await fetch('https://api.replicate.com/v1/models/google/nano-banana-pro/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${REPLICATE_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'wait'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    // Replicate retorna output como string ou array de strings
+    const output = data.output;
+    const imageUrl = Array.isArray(output) ? output[0] : output;
+
+    if (!imageUrl) throw new Error('Sem imagem no retorno da API');
+
+    apiResult = imageUrl;
+
+  } catch (err) {
+    console.error('Replicate error:', err);
+    showToast('⚠️ Erro na API: ' + err.message + ' — usando resultado mockado');
+    // Fallback para mock em caso de erro
+    apiResult = 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800&h=1000&fit=crop';
+  }
+}
+
+/* ── RESULT ── */
+function mostrarResultado() {
+  if (!apiResult) return; // aguarda API ainda
+  document.getElementById('resultImg').src = apiResult;
+  goTo('s4');
+  setTimeout(() => {
+    ['m1','m2','m3'].forEach((id, i) =>
+      setTimeout(() => document.getElementById(id).classList.add('on'), i * 150)
+    );
+  }, 300);
+}
+
+/* ── RESET ── */
+function reiniciar() {
+  selectedProduct = -1;
+  userPhotoLoaded = false;
+  userPhotoBase64 = '';
+  animDone = false;
+  apiResult = null;
+  ['m1','m2','m3'].forEach(id => document.getElementById(id).classList.remove('on'));
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btnS1').disabled = true;
+  document.getElementById('btnS2').disabled = true;
+  document.getElementById('upreview').classList.remove('show');
+  document.getElementById('uz').style.display = '';
+  document.getElementById('fi').value = '';
+  goTo('s1');
+}
+
+/* ── NAVIGATION ── */
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  updateSteps(screenId);
+}
+
+function updateSteps(screenId) {
+  const map = { s1:1, s2:2, s3:2, s4:3 };
+  const current = map[screenId] || 1;
+  [1,2,3].forEach(n => {
+    const si = document.getElementById('si'+n);
+    const sa = document.getElementById('sa'+n);
+    si.classList.remove('active','done');
+    if (sa) sa.classList.remove('done');
+    if (n < current) { si.classList.add('done'); if(sa) sa.classList.add('done'); }
+    else if (n === current) si.classList.add('active');
+  });
+}
+
+/* ── TOAST ── */
+let tt;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

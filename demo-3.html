@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ImageAI — Agentic Commerce · Demo 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0d0d0d;
+      --s1:      #141414;
+      --s2:      #1c1c1c;
+      --s3:      #242424;
+      --border:  rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.13);
+      --red:     #e8193c;
+      --red-dim: rgba(232,25,60,0.12);
+      --text:    #f4f4f4;
+      --muted:   #888;
+      --muted2:  #444;
+      --green:   #3ddc84;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; overflow-x:hidden; }
+
+    /* ── HEADER ── */
+    header {
+      position:sticky; top:0; z-index:100;
+      background:rgba(13,13,13,0.92);
+      backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);
+      padding:0 52px; height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .logo { display:flex; align-items:center; gap:10px; }
+    .logo-ai { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--red); letter-spacing:-1px; }
+    .logo-div { width:1px; height:28px; background:var(--border2); }
+    .logo-r { display:flex; flex-direction:column; line-height:1.2; }
+    .logo-startse { font-size:10px; color:var(--muted); letter-spacing:1.2px; text-transform:uppercase; font-weight:500; }
+    .logo-brand { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+    .demo-badge {
+      background:var(--red-dim); border:1px solid rgba(232,25,60,.3);
+      color:var(--red); padding:4px 14px; border-radius:4px;
+      font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+      display:flex; align-items:center; gap:7px;
+    }
+    .pulse { width:6px; height:6px; background:var(--red); border-radius:50%; animation:pulse 2s infinite; flex-shrink:0; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.7)} }
+
+    /* ── HERO ── */
+    .hero {
+      padding:60px 52px 48px;
+      border-bottom:1px solid var(--border);
+      display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;
+      position:relative; overflow:hidden;
+    }
+    .hero::before {
+      content:''; position:absolute; top:-120px; right:-100px;
+      width:500px; height:500px;
+      background:radial-gradient(circle, rgba(232,25,60,0.06) 0%, transparent 65%);
+      pointer-events:none;
+    }
+    .hero-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+      color:var(--red); margin-bottom:18px;
+    }
+    .hero h1 { font-family:'Syne',sans-serif; font-size:52px; font-weight:800; line-height:1.05; letter-spacing:-2px; }
+    .hero h1 .r { color:var(--red); }
+    .hero-sub { font-size:15px; color:var(--muted); line-height:1.65; margin-top:14px; max-width:420px; }
+
+    .hero-stats { display:flex; gap:40px; margin-top:32px; }
+    .sv { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; color:var(--red); line-height:1; }
+    .sl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-top:3px; }
+
+    /* before/after preview no hero */
+    .hero-preview {
+      display:grid; grid-template-columns:1fr 1fr; gap:12px;
+    }
+    .hp-card {
+      border-radius:10px; overflow:hidden; border:1px solid var(--border);
+      position:relative;
+    }
+    .hp-card img { width:100%; height:220px; object-fit:cover; display:block; }
+    .hp-label {
+      position:absolute; top:10px; left:10px;
+      background:rgba(13,13,13,.75); backdrop-filter:blur(6px);
+      border:1px solid var(--border); padding:3px 10px; border-radius:4px;
+      font-size:10px; font-weight:600; letter-spacing:.8px; text-transform:uppercase;
+    }
+    .hp-badge {
+      position:absolute; top:10px; right:10px;
+      background:rgba(61,220,132,.12); border:1px solid var(--green); color:var(--green);
+      padding:3px 9px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
+    }
+    .hp-bar {
+      position:absolute; bottom:0; left:0; right:0;
+      background:linear-gradient(0deg,rgba(13,13,13,.85) 0%,transparent 100%);
+      padding:18px 12px 10px; font-size:11px; color:rgba(255,255,255,.75); font-weight:500;
+    }
+
+    /* ── MAIN TOOL ── */
+    .tool-section {
+      padding:48px 52px 80px;
+      display:grid; grid-template-columns:380px 1fr; gap:32px; align-items:start;
+    }
+
+    /* LEFT PANEL */
+    .left-panel { display:flex; flex-direction:column; gap:20px; }
+
+    .panel-block {
+      background:var(--s1); border:1px solid var(--border); border-radius:12px; padding:20px;
+    }
+    .block-title {
+      font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+      margin-bottom:14px; display:flex; align-items:center; gap:8px;
+    }
+    .block-title .num {
+      width:22px; height:22px; background:var(--red); border-radius:5px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:800; color:#fff; flex-shrink:0;
+    }
+
+    /* upload */
+    .uzone {
+      border:2px dashed rgba(232,25,60,.2); border-radius:8px; padding:28px 16px;
+      text-align:center; cursor:pointer; transition:all .25s; background:rgba(232,25,60,.02);
+    }
+    .uzone:hover, .uzone.drag { border-color:rgba(232,25,60,.45); background:rgba(232,25,60,.04); }
+    .uzone-icon { font-size:28px; margin-bottom:8px; }
+    .uzone-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; }
+    .uzone-sub { font-size:12px; color:var(--muted); }
+    #fi { display:none; }
+
+    /* product thumb preview */
+    .upreview { display:none; position:relative; border-radius:8px; overflow:hidden; }
+    .upreview.show { display:block; }
+    .upreview img { width:100%; height:160px; object-fit:contain; display:block; background:var(--s3); }
+    .upreview-change {
+      position:absolute; bottom:8px; right:8px;
+      background:rgba(13,13,13,.75); backdrop-filter:blur(6px); border:1px solid var(--border2);
+      color:var(--text); padding:5px 12px; border-radius:5px; font-size:11px; font-weight:500; cursor:pointer;
+    }
+
+    /* sample products */
+    .samples-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .sample {
+      border:1.5px solid var(--border); border-radius:8px; overflow:hidden; cursor:pointer;
+      transition:all .2s; background:var(--s2);
+    }
+    .sample:hover { border-color:rgba(232,25,60,.3); transform:translateY(-2px); }
+    .sample.active { border-color:var(--red); }
+    .sample img { width:100%; height:72px; object-fit:contain; display:block; background:#f5f5f5; }
+    .sample-name { font-size:10px; color:var(--muted); padding:5px 6px; text-align:center; }
+
+    /* backgrounds */
+    .bg-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .bg-opt {
+      border:1.5px solid var(--border); border-radius:8px; overflow:hidden; cursor:pointer;
+      transition:all .2s; position:relative;
+    }
+    .bg-opt:hover { border-color:rgba(232,25,60,.3); transform:translateY(-2px); }
+    .bg-opt.active { border-color:var(--red); }
+    .bg-opt img { width:100%; height:58px; object-fit:cover; display:block; }
+    .bg-opt-label {
+      position:absolute; bottom:0; left:0; right:0;
+      background:rgba(13,13,13,.7); padding:3px 5px; text-align:center;
+      font-size:10px; font-weight:500; color:var(--text);
+    }
+    .bg-opt.active::after {
+      content:'✓'; position:absolute; top:4px; right:4px;
+      background:var(--red); color:#fff; width:14px; height:14px; border-radius:50%;
+      font-size:9px; display:flex; align-items:center; justify-content:center;
+      font-weight:800;
+    }
+
+    /* colors */
+    .color-row { display:flex; gap:8px; flex-wrap:wrap; }
+    .color-opt {
+      width:32px; height:32px; border-radius:8px; border:2px solid var(--border);
+      cursor:pointer; transition:all .2s; position:relative;
+    }
+    .color-opt:hover { transform:scale(1.15); }
+    .color-opt.active { border-color:var(--text); }
+    .color-opt.active::after {
+      content:'✓'; position:absolute; inset:0; display:flex; align-items:center;
+      justify-content:center; font-size:11px; font-weight:800;
+      color:rgba(255,255,255,.9); text-shadow:0 1px 2px rgba(0,0,0,.6);
+    }
+
+    /* generate btn */
+    .btn-generate {
+      background:linear-gradient(135deg,var(--red),#c0102c); border:none; color:#fff;
+      padding:14px; border-radius:8px; font-family:'Inter',sans-serif;
+      font-size:14px; font-weight:700; cursor:pointer; width:100%;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      transition:all .25s; letter-spacing:.3px;
+    }
+    .btn-generate:hover:not(:disabled) { filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 8px 24px rgba(232,25,60,.3); }
+    .btn-generate:disabled { opacity:.35; cursor:not-allowed; transform:none; }
+
+    /* RIGHT PANEL */
+    .right-panel { display:flex; flex-direction:column; gap:20px; }
+
+    .result-header {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;
+    }
+    .result-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
+    .result-status {
+      display:flex; align-items:center; gap:6px;
+      font-size:12px; color:var(--muted); font-weight:500;
+    }
+
+    /* comparison slider */
+    .compare-wrap {
+      background:var(--s1); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+      position:relative;
+    }
+    .compare-inner {
+      position:relative; width:100%; height:460px; overflow:hidden; user-select:none;
+    }
+    .compare-after {
+      position:absolute; inset:0;
+      background:var(--s2); display:flex; align-items:center; justify-content:center;
+    }
+    .compare-after img { width:100%; height:100%; object-fit:contain; display:block; }
+    .compare-before {
+      position:absolute; inset:0; overflow:hidden;
+      clip-path:inset(0 50% 0 0);
+      transition:clip-path 0s;
+    }
+    .compare-before img { width:100%; height:100%; object-fit:contain; display:block; background:#f5f5f5; }
+    .compare-handle {
+      position:absolute; top:0; bottom:0; left:50%; transform:translateX(-50%);
+      width:2px; background:rgba(255,255,255,.8); cursor:ew-resize; z-index:10;
+      transition:left 0s;
+    }
+    .compare-handle::before {
+      content:''; position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(255,255,255,.95); border:2px solid rgba(0,0,0,.1);
+      box-shadow:0 2px 16px rgba(0,0,0,.4);
+    }
+    .compare-handle::after {
+      content:'◁ ▷'; position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      font-size:11px; color:rgba(0,0,0,.6); font-weight:700; letter-spacing:-1px;
+      pointer-events:none;
+    }
+    .compare-badge-before {
+      position:absolute; top:12px; left:12px; z-index:5;
+      background:rgba(13,13,13,.75); backdrop-filter:blur(6px);
+      border:1px solid var(--border); padding:3px 10px; border-radius:4px;
+      font-size:10px; font-weight:600; letter-spacing:.8px; text-transform:uppercase;
+    }
+    .compare-badge-after {
+      position:absolute; top:12px; right:12px; z-index:5;
+      background:rgba(61,220,132,.12); border:1px solid var(--green); color:var(--green);
+      padding:3px 10px; border-radius:4px;
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
+    }
+    .compare-bar {
+      position:absolute; bottom:0; left:0; right:0;
+      background:linear-gradient(0deg,rgba(13,13,13,.9) 0%,transparent 100%);
+      padding:24px 16px 14px;
+      display:flex; align-items:flex-end; justify-content:space-between;
+      z-index:5;
+    }
+
+    /* empty state */
+    .compare-empty {
+      height:460px; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:12px;
+      color:var(--muted2); text-align:center;
+    }
+    .compare-empty-icon { font-size:48px; opacity:.4; }
+    .compare-empty-text { font-size:13px; color:var(--muted); }
+
+    /* loading overlay */
+    .gen-loading {
+      position:absolute; inset:0; background:rgba(13,13,13,.88);
+      backdrop-filter:blur(10px); border-radius:12px;
+      display:none; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+      z-index:20;
+    }
+    .gen-loading.show { display:flex; }
+    .spin-wrap { width:72px; height:72px; position:relative; }
+    .lring { position:absolute; inset:0; border-radius:50%; border:2.5px solid transparent; border-top-color:var(--red); animation:spin .9s linear infinite; }
+    .lring2 { inset:10px; border-top-color:rgba(232,25,60,.35); animation-duration:1.5s; animation-direction:reverse; }
+    .lring3 { inset:20px; border-top-color:rgba(232,25,60,.15); animation-duration:2.2s; }
+    .lcenter { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--red); }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .gen-loading-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
+    .gen-loading-step { font-size:12px; color:var(--muted); }
+    .gen-progress { width:200px; height:2px; background:var(--s3); border-radius:100px; overflow:hidden; margin-top:4px; }
+    .gen-fill { height:100%; background:var(--red); border-radius:100px; width:0; transition:width .35s ease; }
+
+    /* metrics strip */
+    .metrics-strip {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+    }
+    .metric-card {
+      background:var(--s1); border:1px solid var(--border); border-radius:10px;
+      padding:16px; text-align:center; transition:all .3s;
+    }
+    .metric-card.highlight { border-color:rgba(232,25,60,.3); background:rgba(232,25,60,.05); }
+    .metric-val { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--red); line-height:1; }
+    .metric-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-top:4px; }
+    .metric-delta { font-size:11px; color:var(--green); font-weight:600; margin-top:4px; }
+
+    /* variations grid */
+    .variations-wrap {
+      background:var(--s1); border:1px solid var(--border); border-radius:12px; padding:20px;
+    }
+    .var-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .var-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+    .var-sub { font-size:11px; color:var(--muted); }
+    .var-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .var-card {
+      border:1.5px solid var(--border); border-radius:8px; overflow:hidden;
+      cursor:pointer; transition:all .2s; background:var(--s2);
+    }
+    .var-card:hover { border-color:rgba(232,25,60,.3); transform:translateY(-2px); }
+    .var-card.active { border-color:var(--red); }
+    .var-card img { width:100%; height:100px; object-fit:contain; display:block; background:#f5f5f5; }
+    .var-card-info { padding:6px 8px 8px; }
+    .var-card-color { font-size:11px; font-weight:600; }
+    .var-card-badge { font-size:10px; color:var(--muted); }
+
+    /* toast */
+    .toast {
+      position:fixed; bottom:24px; left:50%;
+      transform:translateX(-50%) translateY(70px);
+      background:var(--s2); border:1px solid var(--border2);
+      padding:10px 20px; border-radius:8px; font-size:13px; font-weight:500;
+      z-index:9999; box-shadow:0 12px 40px rgba(0,0,0,.5);
+      transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      opacity:0; white-space:nowrap;
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+    @media(max-width:1100px) {
+      .tool-section { grid-template-columns:1fr; }
+      .hero { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-ai">AI</span>
+    <div class="logo-div"></div>
+    <div class="logo-r">
+      <span class="logo-startse">.StartSe ›</span>
+      <span class="logo-brand">Agentic Commerce</span>
+    </div>
+  </div>
+  <div class="demo-badge">
+    <span class="pulse"></span>
+    Demo 2 · Image AI
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-eyebrow">✦ Imagem como alavanca de receita</div>
+    <h1>Foto ruim<br/>custa <span class="r">caro.</span></h1>
+    <p class="hero-sub">IA generativa transforma imagens comuns em fotos de catálogo profissional — em segundos, sem estúdio, sem fotógrafo. Mais CTR, mais conversão.</p>
+    <div class="hero-stats">
+      <div><div class="sv">+38%</div><div class="sl">CTR médio</div></div>
+      <div><div class="sv">+27%</div><div class="sl">Conversão</div></div>
+      <div><div class="sv">90%</div><div class="sl">Menos custo</div></div>
+    </div>
+  </div>
+  <div class="hero-preview">
+    <div class="hp-card">
+      <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=440&fit=crop" alt="antes"/>
+      <span class="hp-label">Antes</span>
+      <div class="hp-bar">Fundo bagunçado, iluminação ruim</div>
+    </div>
+    <div class="hp-card">
+      <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=440&fit=crop&sat=-20&bright=10" alt="depois"/>
+      <span class="hp-label">Depois</span>
+      <span class="hp-badge">✦ IA</span>
+      <div class="hp-bar">Fundo lifestyle · +38% CTR</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN TOOL -->
+<div class="tool-section">
+
+  <!-- LEFT: Controls -->
+  <div class="left-panel">
+
+    <!-- STEP 1: Produto -->
+    <div class="panel-block">
+      <p class="block-title"><span class="num">1</span> Selecione o produto</p>
+      <div class="uzone" id="uz" onclick="document.getElementById('fi').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondrop="handleDrop(event)" ondragleave="this.classList.remove('drag')">
+        <div class="uzone-icon">📦</div>
+        <p class="uzone-title">Upload da foto</p>
+        <p class="uzone-sub">JPG, PNG, WEBP · arraste ou clique</p>
+        <input type="file" id="fi" accept="image/*" onchange="handleFile(event)"/>
+      </div>
+      <div class="upreview" id="upreview">
+        <img id="upreview-img" src="" alt="preview"/>
+        <button class="upreview-change" onclick="document.getElementById('fi').click()">✎ Trocar</button>
+      </div>
+
+      <p style="font-size:11px;color:var(--muted);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Ou use um produto de exemplo</p>
+      <div class="samples-grid">
+        <div class="sample active" onclick="selectSample(0,this)">
+          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&h=90&fit=crop" alt="Tênis"/>
+          <div class="sample-name">Tênis</div>
+        </div>
+        <div class="sample" onclick="selectSample(1,this)">
+          <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120&h=90&fit=crop" alt="Relógio"/>
+          <div class="sample-name">Relógio</div>
+        </div>
+        <div class="sample" onclick="selectSample(2,this)">
+          <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=120&h=90&fit=crop" alt="Bolsa"/>
+          <div class="sample-name">Bolsa</div>
+        </div>
+        <div class="sample" onclick="selectSample(3,this)">
+          <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=120&h=90&fit=crop" alt="Perfume"/>
+          <div class="sample-name">Perfume</div>
+        </div>
+        <div class="sample" onclick="selectSample(4,this)">
+          <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=120&h=90&fit=crop" alt="Tênis 2"/>
+          <div class="sample-name">Tênis 2</div>
+        </div>
+        <div class="sample" onclick="selectSample(5,this)">
+          <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=120&h=90&fit=crop" alt="Teclado"/>
+          <div class="sample-name">Teclado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Cenário -->
+    <div class="panel-block">
+      <p class="block-title"><span class="num">2</span> Escolha o cenário</p>
+      <div class="bg-grid">
+        <div class="bg-opt active" onclick="selectBg(0,this)">
+          <img src="https://images.unsplash.com/photo-1617957743089-0d4fed313462?w=120&h=70&fit=crop" alt="Studio"/>
+          <div class="bg-opt-label">Studio</div>
+        </div>
+        <div class="bg-opt" onclick="selectBg(1,this)">
+          <img src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=120&h=70&fit=crop" alt="Lifestyle"/>
+          <div class="bg-opt-label">Lifestyle</div>
+        </div>
+        <div class="bg-opt" onclick="selectBg(2,this)">
+          <img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=120&h=70&fit=crop" alt="Natureza"/>
+          <div class="bg-opt-label">Natureza</div>
+        </div>
+        <div class="bg-opt" onclick="selectBg(3,this)">
+          <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=120&h=70&fit=crop" alt="Office"/>
+          <div class="bg-opt-label">Office</div>
+        </div>
+        <div class="bg-opt" onclick="selectBg(4,this)">
+          <img src="https://images.unsplash.com/photo-1578898887932-dce23a595ad4?w=120&h=70&fit=crop" alt="Urbano"/>
+          <div class="bg-opt-label">Urbano</div>
+        </div>
+        <div class="bg-opt" onclick="selectBg(5,this)">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=70&fit=crop" alt="Minimalista"/>
+          <div class="bg-opt-label">Minimal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Cor -->
+    <div class="panel-block">
+      <p class="block-title"><span class="num">3</span> Variação de cor</p>
+      <div class="color-row" id="colorRow">
+        <!-- populado via JS -->
+      </div>
+    </div>
+
+    <!-- GENERATE -->
+    <button class="btn-generate" id="btnGenerate" onclick="gerarImagem()">
+      <span style="font-size:16px;">✦</span> Gerar Imagem com IA
+    </button>
+
+  </div>
+
+  <!-- RIGHT: Result -->
+  <div class="right-panel">
+
+    <!-- Metrics -->
+    <div class="metrics-strip" id="metricsStrip">
+      <div class="metric-card" id="m1">
+        <div class="metric-val" id="mv1">—</div>
+        <div class="metric-lbl">CTR estimado</div>
+        <div class="metric-delta" id="md1"></div>
+      </div>
+      <div class="metric-card" id="m2">
+        <div class="metric-val" id="mv2">—</div>
+        <div class="metric-lbl">Conversão</div>
+        <div class="metric-delta" id="md2"></div>
+      </div>
+      <div class="metric-card" id="m3">
+        <div class="metric-val" id="mv3">—</div>
+        <div class="metric-lbl">Qualidade</div>
+        <div class="metric-delta" id="md3"></div>
+      </div>
+    </div>
+
+    <!-- Comparison -->
+    <div class="compare-wrap">
+      <div class="gen-loading" id="genLoading">
+        <div class="spin-wrap">
+          <div class="lring"></div>
+          <div class="lring lring2"></div>
+          <div class="lring lring3"></div>
+          <div class="lcenter">AI</div>
+        </div>
+        <p class="gen-loading-title">Processando imagem…</p>
+        <p class="gen-loading-step" id="genStep">Removendo fundo original</p>
+        <div class="gen-progress"><div class="gen-fill" id="genFill"></div></div>
+      </div>
+
+      <div id="compareEmpty" class="compare-empty">
+        <div class="compare-empty-icon">🖼️</div>
+        <p class="compare-empty-text">Selecione um produto e cenário,<br/>depois clique em <strong>Gerar Imagem com IA</strong></p>
+      </div>
+
+      <div class="compare-inner" id="compareInner" style="display:none;">
+        <span class="compare-badge-before">Antes</span>
+        <span class="compare-badge-after">✦ IA Gerada</span>
+        <div class="compare-after">
+          <img id="imgAfter" src="" alt="Depois"/>
+        </div>
+        <div class="compare-before" id="compareBefore">
+          <img id="imgBefore" src="" alt="Antes"/>
+        </div>
+        <div class="compare-handle" id="compareHandle"></div>
+        <div class="compare-bar">
+          <span style="font-size:12px;color:rgba(255,255,255,.7);" id="barLabel">Arraste para comparar</span>
+          <span style="background:rgba(61,220,132,.12);border:1px solid #3ddc84;color:#3ddc84;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">✦ Aprovado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variations -->
+    <div class="variations-wrap" id="variationsWrap" style="display:none;">
+      <div class="var-header">
+        <p class="var-title">✦ Variações geradas</p>
+        <span class="var-sub">Clique para aplicar</span>
+      </div>
+      <div class="var-grid" id="varGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg">✅ Pronto!</span></div>
+
+<script>
+/* ── DADOS MOCKADOS ── */
+const SAMPLES = [
+  {
+    name: 'Tênis Nike',
+    before: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop',
+    colors: ['#f5f5f5','#111','#e8193c','#1b3a5c','#c8a050'],
+    colorNames: ['Branco','Preto','Vermelho','Navy','Dourado'],
+    variations: [
+      { src:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=240&fit=crop', color:'Branco' },
+      { src:'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=300&h=240&fit=crop', color:'Colorido' },
+      { src:'https://images.unsplash.com/photo-1608231387042-66d1773d3028?w=300&h=240&fit=crop', color:'Preto' },
+      { src:'https://images.unsplash.com/photo-1556906781-9a412961a28c?w=300&h=240&fit=crop', color:'Lifestyle' },
+    ]
+  },
+  {
+    name: 'Relógio',
+    before: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&h=700&fit=crop',
+    colors: ['#c0a060','#888','#111','#f5f5f5','#b87333'],
+    colorNames: ['Dourado','Prata','Preto','Branco','Bronze'],
+    variations: [
+      { src:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=240&fit=crop', color:'Dourado' },
+      { src:'https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?w=300&h=240&fit=crop', color:'Prata' },
+      { src:'https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=300&h=240&fit=crop', color:'Studio' },
+      { src:'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=300&h=240&fit=crop', color:'Lifestyle' },
+    ]
+  },
+  {
+    name: 'Bolsa',
+    before: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=900&h=700&fit=crop',
+    colors: ['#8b4513','#111','#f5f5f5','#c8a050','#e8193c'],
+    colorNames: ['Caramelo','Preto','Off-white','Dourado','Vermelho'],
+    variations: [
+      { src:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=300&h=240&fit=crop', color:'Caramelo' },
+      { src:'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=300&h=240&fit=crop', color:'Estilo' },
+      { src:'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&h=240&fit=crop', color:'Rosa' },
+      { src:'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=300&h=240&fit=crop', color:'Lifestyle' },
+    ]
+  },
+  {
+    name: 'Perfume',
+    before: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=900&h=700&fit=crop',
+    colors: ['#c8a050','#e8c97a','#f5e6d3','#111','#888'],
+    colorNames: ['Âmbar','Dourado','Creme','Preto','Prata'],
+    variations: [
+      { src:'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&h=240&fit=crop', color:'Studio' },
+      { src:'https://images.unsplash.com/photo-1619994403073-2cec844b8e63?w=300&h=240&fit=crop', color:'Lifestyle' },
+      { src:'https://images.unsplash.com/photo-1541643600914-78b084683702?w=300&h=240&fit=crop', color:'Dark' },
+      { src:'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&h=240&fit=crop', color:'Floral' },
+    ]
+  },
+  {
+    name: 'Tênis 2',
+    before: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=900&h=700&fit=crop',
+    colors: ['#f5f5f5','#e8193c','#1b3a5c','#c8a050','#111'],
+    colorNames: ['Branco','Vermelho','Azul','Dourado','Preto'],
+    variations: [
+      { src:'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=300&h=240&fit=crop', color:'Original' },
+      { src:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=240&fit=crop', color:'Branco' },
+      { src:'https://images.unsplash.com/photo-1608231387042-66d1773d3028?w=300&h=240&fit=crop', color:'Dark' },
+      { src:'https://images.unsplash.com/photo-1556906781-9a412961a28c?w=300&h=240&fit=crop', color:'Lifestyle' },
+    ]
+  },
+  {
+    name: 'Teclado',
+    before: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=900&h=700&fit=crop',
+    colors: ['#111','#f5f5f5','#e8193c','#1b3a5c','#888'],
+    colorNames: ['Preto','Branco','Vermelho','Navy','Cinza'],
+    variations: [
+      { src:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300&h=240&fit=crop', color:'Original' },
+      { src:'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=300&h=240&fit=crop', color:'Dark' },
+      { src:'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=240&fit=crop', color:'Office' },
+      { src:'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=300&h=240&fit=crop', color:'Setup' },
+    ]
+  },
+];
+
+const BGS = [
+  { name:'Studio', after:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop&sat=-30' },
+  { name:'Lifestyle', after:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop' },
+  { name:'Natureza', after:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop&hue=90' },
+  { name:'Office', after:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop&hue=200' },
+  { name:'Urbano', after:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop&hue=270' },
+  { name:'Minimal', after:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop&sat=-80' },
+];
+
+const METRICS = [
+  { ctr:'+38%', conv:'+27%', qual:'9.4/10' },
+  { ctr:'+44%', conv:'+31%', qual:'9.7/10' },
+  { ctr:'+29%', conv:'+22%', qual:'9.1/10' },
+  { ctr:'+51%', conv:'+38%', qual:'9.8/10' },
+  { ctr:'+35%', conv:'+25%', qual:'9.3/10' },
+  { ctr:'+42%', conv:'+33%', qual:'9.6/10' },
+];
+
+const STEPS = [
+  'Removendo fundo original…',
+  'Analisando produto e bordas…',
+  'Aplicando cenário selecionado…',
+  'Ajustando luz e sombras…',
+  'Gerando variações de cor…',
+  'Finalizando…',
+];
+
+let curSample = 0, curBg = 0, curColor = 0, uploadedImg = null, isGenerating = false;
+
+/* ── INIT ── */
+renderColors();
+selectSample(0, document.querySelector('.sample.active'));
+
+/* ── SAMPLE SELECT ── */
+function selectSample(idx, el) {
+  curSample = idx;
+  document.querySelectorAll('.sample').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  uploadedImg = null;
+  document.getElementById('upreview').classList.remove('show');
+  document.getElementById('uz').style.display = '';
+  curColor = 0;
+  renderColors();
+}
+
+/* ── FILE UPLOAD ── */
+function handleFile(e) { const f = e.target.files[0]; if (f) loadPhoto(f); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uz').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadPhoto(f);
+}
+function loadPhoto(file) {
+  const r = new FileReader();
+  r.onload = ev => {
+    uploadedImg = ev.target.result;
+    document.getElementById('upreview-img').src = uploadedImg;
+    document.getElementById('upreview').classList.add('show');
+    document.getElementById('uz').style.display = 'none';
+    document.querySelectorAll('.sample').forEach(s => s.classList.remove('active'));
+  };
+  r.readAsDataURL(file);
+}
+
+/* ── BG SELECT ── */
+function selectBg(idx, el) {
+  curBg = idx;
+  document.querySelectorAll('.bg-opt').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+/* ── COLORS ── */
+function renderColors() {
+  const row = document.getElementById('colorRow');
+  row.innerHTML = '';
+  const sample = SAMPLES[curSample];
+  sample.colors.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'color-opt' + (i === curColor ? ' active' : '');
+    el.style.background = c;
+    el.style.border = c === '#f5f5f5' ? '2px solid rgba(255,255,255,.3)' : '2px solid var(--border)';
+    el.title = sample.colorNames[i];
+    el.onclick = () => {
+      curColor = i;
+      document.querySelectorAll('.color-opt').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+    };
+    row.appendChild(el);
+  });
+}
+
+/* ── GERAR IMAGEM ── */
+function gerarImagem() {
+  if (isGenerating) return;
+  isGenerating = true;
+
+  const loading = document.getElementById('genLoading');
+  const fill = document.getElementById('genFill');
+  const stepEl = document.getElementById('genStep');
+  document.getElementById('compareEmpty').style.display = 'none';
+  document.getElementById('compareInner').style.display = 'none';
+  document.getElementById('variationsWrap').style.display = 'none';
+  loading.classList.add('show');
+  document.getElementById('btnGenerate').disabled = true;
+
+  // Reset metrics
+  ['mv1','mv2','mv3'].forEach(id => document.getElementById(id).textContent = '—');
+  ['md1','md2','md3'].forEach(id => document.getElementById(id).textContent = '');
+  ['m1','m2','m3'].forEach(id => document.getElementById(id).classList.remove('highlight'));
+
+  const DURATION = 3500;
+  const start = performance.now();
+
+  function tick(now) {
+    const pct = Math.min((now - start) / DURATION * 100, 100);
+    fill.style.width = pct + '%';
+    const si = Math.min(Math.floor(pct / 17), STEPS.length - 1);
+    stepEl.textContent = STEPS[si];
+
+    if (pct < 100) {
+      requestAnimationFrame(tick);
+    } else {
+      setTimeout(mostrarResultado, 200);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ── MOSTRAR RESULTADO (MOCK) ── */
+function mostrarResultado() {
+  const sample = SAMPLES[curSample];
+  const beforeSrc = uploadedImg || sample.before;
+  const afterSrc  = sample.variations[curBg % sample.variations.length].src;
+
+  document.getElementById('imgBefore').src = beforeSrc;
+  document.getElementById('imgAfter').src  = afterSrc;
+
+  document.getElementById('genLoading').classList.remove('show');
+  document.getElementById('compareInner').style.display = '';
+
+  // animate handle to center
+  setHandle(50);
+  initDrag();
+
+  // metrics
+  const m = METRICS[curBg];
+  setTimeout(() => {
+    animateVal('mv1', m.ctr);
+    animateVal('mv2', m.conv);
+    animateVal('mv3', m.qual);
+    document.getElementById('md1').textContent = 'vs. foto original';
+    document.getElementById('md2').textContent = 'vs. foto original';
+    document.getElementById('md3').textContent = 'Score IA';
+    ['m1','m2','m3'].forEach(id => document.getElementById(id).classList.add('highlight'));
+  }, 300);
+
+  // variations
+  setTimeout(() => {
+    renderVariations(sample);
+    document.getElementById('variationsWrap').style.display = '';
+  }, 400);
+
+  isGenerating = false;
+  document.getElementById('btnGenerate').disabled = false;
+  showToast('✦ Imagem gerada com sucesso!');
+}
+
+function animateVal(id, target) {
+  const el = document.getElementById(id);
+  el.style.transition = 'none';
+  el.textContent = '0';
+  setTimeout(() => {
+    el.style.transition = 'all .5s ease';
+    el.textContent = target;
+  }, 50);
+}
+
+/* ── COMPARISON DRAG ── */
+let dragging = false;
+function setHandle(pct) {
+  const handle = document.getElementById('compareHandle');
+  const before  = document.getElementById('compareBefore');
+  handle.style.left = pct + '%';
+  before.style.clipPath = `inset(0 ${100-pct}% 0 0)`;
+  document.getElementById('barLabel').textContent = pct < 20 ? 'IA →' : pct > 80 ? '← Original' : 'Arraste para comparar';
+}
+function initDrag() {
+  const wrap = document.getElementById('compareInner');
+  const handle = document.getElementById('compareHandle');
+  const getX = e => (e.touches ? e.touches[0].clientX : e.clientX);
+  handle.onmousedown = handle.ontouchstart = () => dragging = true;
+  wrap.onmousemove = wrap.ontouchmove = e => {
+    if (!dragging) return;
+    e.preventDefault();
+    const rect = wrap.getBoundingClientRect();
+    const pct = Math.max(2, Math.min(98, (getX(e) - rect.left) / rect.width * 100));
+    setHandle(pct);
+  };
+  document.onmouseup = document.ontouchend = () => dragging = false;
+}
+
+/* ── VARIATIONS ── */
+function renderVariations(sample) {
+  const grid = document.getElementById('varGrid');
+  grid.innerHTML = '';
+  sample.variations.forEach((v, i) => {
+    const card = document.createElement('div');
+    card.className = 'var-card' + (i === 0 ? ' active' : '');
+    card.innerHTML = `
+      <img src="${v.src}" alt="${v.color}"/>
+      <div class="var-card-info">
+        <p class="var-card-color">${v.color}</p>
+        <p class="var-card-badge">Variação ${i+1}</p>
+      </div>`;
+    card.onclick = () => {
+      document.querySelectorAll('.var-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      document.getElementById('imgAfter').src = v.src;
+      showToast(`✦ Variação "${v.color}" aplicada`);
+    };
+    grid.appendChild(card);
+  });
+}
+
+/* ── TOAST ── */
+let tt;
+function showToast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

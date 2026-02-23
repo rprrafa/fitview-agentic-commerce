@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ImageAI — Agentic Commerce · Demo 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:     #0d0d0d;
+      --s1:     #141414;
+      --s2:     #1c1c1c;
+      --s3:     #242424;
+      --border: rgba(255,255,255,0.07);
+      --red:    #e8193c;
+      --red-dim:rgba(232,25,60,0.10);
+      --text:   #f4f4f4;
+      --muted:  #888;
+      --green:  #3ddc84;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+
+    /* HEADER */
+    header {
+      position:sticky; top:0; z-index:100;
+      background:rgba(13,13,13,0.92); backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);
+      padding:0 52px; height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .logo { display:flex; align-items:center; gap:10px; }
+    .logo-ai { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--red); letter-spacing:-1px; }
+    .logo-div { width:1px; height:28px; background:rgba(255,255,255,.13); }
+    .logo-r { display:flex; flex-direction:column; line-height:1.2; }
+    .logo-startse { font-size:10px; color:var(--muted); letter-spacing:1.2px; text-transform:uppercase; font-weight:500; }
+    .logo-brand { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+    .demo-badge {
+      background:var(--red-dim); border:1px solid rgba(232,25,60,.3);
+      color:var(--red); padding:4px 14px; border-radius:4px;
+      font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+      display:flex; align-items:center; gap:7px;
+    }
+    .pulse { width:6px; height:6px; background:var(--red); border-radius:50%; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.7)} }
+
+    /* MAIN */
+    main {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding:48px 52px;
+    }
+
+    /* ── SCREEN 1: UPLOAD ── */
+    #screenUpload {
+      width:100%; max-width:680px;
+      display:flex; flex-direction:column; align-items:center; gap:32px;
+    }
+    .upload-headline { text-align:center; }
+    .upload-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+      color:var(--red); margin-bottom:14px;
+    }
+    .upload-headline h1 { font-family:'Syne',sans-serif; font-size:42px; font-weight:800; letter-spacing:-1.5px; line-height:1.05; }
+    .upload-headline h1 .r { color:var(--red); }
+    .upload-headline p { font-size:14px; color:var(--muted); margin-top:10px; line-height:1.6; }
+
+    .uzone {
+      width:100%; border:2px dashed rgba(232,25,60,.22); border-radius:12px;
+      padding:52px 32px; text-align:center; cursor:pointer;
+      background:rgba(232,25,60,.02); transition:all .25s;
+    }
+    .uzone:hover, .uzone.drag { border-color:rgba(232,25,60,.5); background:rgba(232,25,60,.05); }
+    .uzone-icon { font-size:40px; margin-bottom:14px; }
+    .uzone h2 { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:6px; }
+    .uzone p { font-size:13px; color:var(--muted); }
+    #fi { display:none; }
+
+    /* preview */
+    .upreview { display:none; width:100%; }
+    .upreview.show { display:block; }
+    .upreview-inner {
+      border:1px solid var(--border); border-radius:12px; overflow:hidden;
+      position:relative; background:var(--s2);
+    }
+    .upreview-inner img { width:100%; max-height:320px; object-fit:contain; display:block; }
+    .upreview-change {
+      position:absolute; top:12px; right:12px;
+      background:rgba(13,13,13,.75); backdrop-filter:blur(6px);
+      border:1px solid rgba(255,255,255,.15); color:var(--text);
+      padding:6px 14px; border-radius:6px; font-size:12px; font-weight:500;
+      cursor:pointer; transition:background .2s;
+    }
+    .upreview-change:hover { background:rgba(13,13,13,.9); }
+
+    /* samples */
+    .samples-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600; width:100%; }
+    .samples-row { display:flex; gap:10px; width:100%; }
+    .sample {
+      flex:1; border:1.5px solid var(--border); border-radius:8px;
+      overflow:hidden; cursor:pointer; transition:all .2s; background:var(--s2);
+    }
+    .sample:hover { border-color:rgba(232,25,60,.35); transform:translateY(-2px); }
+    .sample.active { border-color:var(--red); }
+    .sample img { width:100%; height:68px; object-fit:cover; display:block; }
+    .sample-name { font-size:10px; color:var(--muted); padding:5px 6px; text-align:center; }
+
+    /* button */
+    .btn-gerar {
+      background:linear-gradient(135deg,var(--red),#c0102c); border:none; color:#fff;
+      padding:15px 32px; border-radius:8px; font-family:'Inter',sans-serif;
+      font-size:15px; font-weight:700; cursor:pointer; width:100%;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      transition:all .25s; letter-spacing:.3px;
+    }
+    .btn-gerar:hover:not(:disabled) { filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 8px 24px rgba(232,25,60,.3); }
+    .btn-gerar:disabled { opacity:.35; cursor:not-allowed; transform:none; }
+
+    /* ── SCREEN 2: LOADING ── */
+    #screenLoading {
+      display:none; flex-direction:column; align-items:center; justify-content:center;
+      gap:28px; width:100%; max-width:500px; text-align:center;
+    }
+    .spin-wrap { width:88px; height:88px; position:relative; }
+    .lring {
+      position:absolute; inset:0; border-radius:50%;
+      border:2.5px solid transparent; border-top-color:var(--red);
+      animation:spin .9s linear infinite;
+    }
+    .lring2 { inset:12px; border-top-color:rgba(232,25,60,.35); animation-duration:1.5s; animation-direction:reverse; }
+    .lring3 { inset:24px; border-top-color:rgba(232,25,60,.15); animation-duration:2.2s; }
+    .lcenter {
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--red);
+    }
+    @keyframes spin { to { transform:rotate(360deg) } }
+    .loading-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; }
+    .loading-step { font-size:13px; color:var(--muted); min-height:20px; }
+    .prog-wrap { width:260px; height:2px; background:var(--s3); border-radius:100px; overflow:hidden; }
+    .prog-fill { height:100%; background:var(--red); border-radius:100px; width:0; }
+
+    /* tags */
+    .loading-tags { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    .ltag {
+      padding:4px 12px; border-radius:100px;
+      border:1px solid var(--border); font-size:11px; color:var(--muted2,#444);
+      transition:all .3s;
+    }
+    .ltag.on { border-color:rgba(232,25,60,.5); color:var(--red); background:rgba(232,25,60,.07); }
+
+    /* ── SCREEN 3: RESULT ── */
+    #screenResult {
+      display:none; flex-direction:column; align-items:center; gap:24px;
+      width:100%; max-width:900px;
+    }
+    .result-header { display:flex; align-items:center; justify-content:space-between; width:100%; }
+    .result-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; }
+    .result-actions { display:flex; gap:10px; }
+    .btn-outline {
+      background:transparent; border:1px solid var(--border); color:var(--text);
+      padding:8px 16px; border-radius:6px; font-size:13px; font-weight:500;
+      cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px;
+    }
+    .btn-outline:hover { border-color:var(--red); color:var(--red); }
+    .btn-primary {
+      background:var(--red); border:1px solid var(--red); color:#fff;
+      padding:8px 16px; border-radius:6px; font-size:13px; font-weight:700;
+      cursor:pointer; transition:all .2s;
+    }
+    .btn-primary:hover { filter:brightness(1.1); }
+
+    /* comparison slider */
+    .compare-wrap {
+      width:100%; background:var(--s1); border:1px solid var(--border);
+      border-radius:12px; overflow:hidden; position:relative;
+    }
+    .compare-inner {
+      position:relative; width:100%; height:480px;
+      overflow:hidden; user-select:none; cursor:ew-resize;
+    }
+    .compare-after {
+      position:absolute; inset:0; background:var(--s2);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .compare-after img { width:100%; height:100%; object-fit:contain; display:block; }
+    .compare-before {
+      position:absolute; inset:0; overflow:hidden;
+      clip-path:inset(0 50% 0 0);
+    }
+    .compare-before img { width:100%; height:100%; object-fit:contain; display:block; background:#f5f5f5; }
+    .compare-handle {
+      position:absolute; top:0; bottom:0; left:50%; transform:translateX(-50%);
+      width:2px; background:rgba(255,255,255,.85); z-index:10; pointer-events:none;
+    }
+    .compare-handle::before {
+      content:''; position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:40px; height:40px; border-radius:50%;
+      background:rgba(255,255,255,.96); border:2px solid rgba(0,0,0,.08);
+      box-shadow:0 2px 20px rgba(0,0,0,.4);
+    }
+    .compare-handle::after {
+      content:'◁ ▷'; position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      font-size:11px; color:rgba(0,0,0,.55); font-weight:700; letter-spacing:-1px;
+    }
+    .compare-badge {
+      position:absolute; top:14px; z-index:5;
+      padding:4px 12px; border-radius:5px;
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px;
+    }
+    .badge-before {
+      left:14px;
+      background:rgba(13,13,13,.75); backdrop-filter:blur(6px);
+      border:1px solid var(--border); color:var(--text);
+    }
+    .badge-after {
+      right:14px;
+      background:rgba(61,220,132,.12); border:1px solid var(--green); color:var(--green);
+    }
+    .compare-hint {
+      position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+      z-index:5; background:rgba(13,13,13,.7); backdrop-filter:blur(6px);
+      border:1px solid var(--border); padding:5px 14px; border-radius:100px;
+      font-size:11px; color:rgba(255,255,255,.6); white-space:nowrap;
+    }
+
+    /* metrics */
+    .metrics-row { display:flex; gap:12px; width:100%; }
+    .metric {
+      flex:1; background:var(--s1); border:1px solid var(--border);
+      border-radius:10px; padding:16px 20px;
+      display:flex; flex-direction:column; gap:4px;
+      transition:all .4s;
+    }
+    .metric.on { border-color:rgba(232,25,60,.3); background:rgba(232,25,60,.05); }
+    .metric-val { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--red); }
+    .metric-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.7px; }
+    .metric-src { font-size:10px; color:#444; }
+
+    /* toast */
+    .toast {
+      position:fixed; bottom:24px; left:50%;
+      transform:translateX(-50%) translateY(60px);
+      background:var(--s2); border:1px solid rgba(255,255,255,.13);
+      padding:10px 22px; border-radius:8px; font-size:13px; font-weight:500;
+      z-index:9999; box-shadow:0 12px 40px rgba(0,0,0,.5);
+      transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      opacity:0;
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-ai">AI</span>
+    <div class="logo-div"></div>
+    <div class="logo-r">
+      <span class="logo-startse">.StartSe ›</span>
+      <span class="logo-brand">Agentic Commerce</span>
+    </div>
+  </div>
+  <div class="demo-badge">
+    <span class="pulse"></span>
+    Demo 2 · Image AI
+  </div>
+</header>
+
+<main>
+
+  <!-- ── SCREEN 1: UPLOAD ── -->
+  <div id="screenUpload">
+    <div class="upload-headline">
+      <div class="upload-eyebrow">✦ Foto ruim custa caro</div>
+      <h1>Transforme qualquer imagem<br/>em foto de <span class="r">catálogo profissional.</span></h1>
+      <p>Upload do produto → IA remove fundo, aplica cenário e gera variações. Sem estúdio, sem fotógrafo.</p>
+    </div>
+
+    <!-- upload zone -->
+    <div class="uzone" id="uz"
+         onclick="document.getElementById('fi').click()"
+         ondragover="event.preventDefault();this.classList.add('drag')"
+         ondrop="handleDrop(event)"
+         ondragleave="this.classList.remove('drag')">
+      <div class="uzone-icon">📦</div>
+      <h2>Upload da foto do produto</h2>
+      <p>JPG, PNG ou WEBP · arraste ou clique para selecionar</p>
+      <input type="file" id="fi" accept="image/*" onchange="handleFile(event)"/>
+    </div>
+
+    <!-- preview -->
+    <div class="upreview" id="upreview">
+      <div class="upreview-inner">
+        <img id="upreview-img" src="" alt="preview"/>
+        <button class="upreview-change" onclick="document.getElementById('fi').click()">✎ Trocar foto</button>
+      </div>
+    </div>
+
+    <!-- samples -->
+    <p class="samples-label">Ou escolha um produto de exemplo</p>
+    <div class="samples-row">
+      <div class="sample active" onclick="selectSample(0,this)">
+        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=130&fit=crop" alt="Tênis"/>
+        <div class="sample-name">Tênis</div>
+      </div>
+      <div class="sample" onclick="selectSample(1,this)">
+        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=130&fit=crop" alt="Relógio"/>
+        <div class="sample-name">Relógio</div>
+      </div>
+      <div class="sample" onclick="selectSample(2,this)">
+        <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=200&h=130&fit=crop" alt="Bolsa"/>
+        <div class="sample-name">Bolsa</div>
+      </div>
+      <div class="sample" onclick="selectSample(3,this)">
+        <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=200&h=130&fit=crop" alt="Perfume"/>
+        <div class="sample-name">Perfume</div>
+      </div>
+      <div class="sample" onclick="selectSample(4,this)">
+        <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=200&h=130&fit=crop" alt="Teclado"/>
+        <div class="sample-name">Teclado</div>
+      </div>
+    </div>
+
+    <button class="btn-gerar" id="btnGerar" onclick="iniciarGeracao()">
+      <span style="font-size:16px">✦</span> Gerar Imagem com IA
+    </button>
+  </div>
+
+  <!-- ── SCREEN 2: LOADING ── -->
+  <div id="screenLoading">
+    <div class="spin-wrap">
+      <div class="lring"></div>
+      <div class="lring lring2"></div>
+      <div class="lring lring3"></div>
+      <div class="lcenter">AI</div>
+    </div>
+    <p class="loading-title">Processando imagem…</p>
+    <p class="loading-step" id="loadingStep">Analisando produto</p>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+    <div class="loading-tags">
+      <span class="ltag" id="t1">Removendo fundo</span>
+      <span class="ltag" id="t2">Ajustando luz</span>
+      <span class="ltag" id="t3">Aplicando cenário</span>
+      <span class="ltag" id="t4">Gerando variações</span>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 3: RESULT ── -->
+  <div id="screenResult">
+    <div class="result-header">
+      <p class="result-title">✦ Resultado gerado</p>
+      <div class="result-actions">
+        <button class="btn-outline" onclick="voltarUpload()">← Nova imagem</button>
+        <button class="btn-primary" onclick="showToast('✅ Imagem exportada!')">Exportar</button>
+      </div>
+    </div>
+
+    <!-- Comparison slider -->
+    <div class="compare-wrap">
+      <div class="compare-inner" id="compareInner">
+        <div class="compare-after">
+          <img id="imgAfter" src="" alt="IA"/>
+        </div>
+        <div class="compare-before" id="cmpBefore">
+          <img id="imgBefore" src="" alt="Original"/>
+        </div>
+        <div class="compare-handle" id="cmpHandle"></div>
+        <span class="compare-badge badge-before">Original</span>
+        <span class="compare-badge badge-after">✦ IA Gerada</span>
+        <span class="compare-hint" id="cmpHint">← Arraste para comparar →</span>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-row">
+      <div class="metric" id="m1">
+        <div class="metric-val">+38%</div>
+        <div class="metric-lbl">CTR estimado</div>
+        <div class="metric-src">vs. foto original</div>
+      </div>
+      <div class="metric" id="m2">
+        <div class="metric-val">+27%</div>
+        <div class="metric-lbl">Conversão</div>
+        <div class="metric-src">vs. foto original</div>
+      </div>
+      <div class="metric" id="m3">
+        <div class="metric-val">9.4/10</div>
+        <div class="metric-lbl">Score de qualidade IA</div>
+        <div class="metric-src">Análise automática</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SAMPLES = [
+  {
+    before: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=700&fit=crop',
+    after:  '/images/camiseta-3.png',
+  },
+  {
+    before: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&h=700&fit=crop',
+    after:  'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=900&h=700&fit=crop',
+  },
+  {
+    before: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=900&h=700&fit=crop',
+    after:  'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=900&h=700&fit=crop',
+  },
+  {
+    before: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=900&h=700&fit=crop',
+    after:  'https://images.unsplash.com/photo-1619994403073-2cec844b8e63?w=900&h=700&fit=crop',
+  },
+  {
+    before: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=900&h=700&fit=crop',
+    after:  'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=900&h=700&fit=crop',
+  },
+];
+
+const STEPS = [
+  ['Analisando produto…',       't1'],
+  ['Removendo fundo…',          't1'],
+  ['Ajustando iluminação…',     't2'],
+  ['Aplicando cenário…',        't3'],
+  ['Gerando variações de cor…', 't4'],
+  ['Finalizando…',              't4'],
+];
+
+const METRICS = [
+  ['+38%', '+27%', '9.4/10'],
+  ['+44%', '+31%', '9.7/10'],
+  ['+29%', '+22%', '9.1/10'],
+  ['+51%', '+38%', '9.8/10'],
+  ['+42%', '+33%', '9.6/10'],
+];
+
+let curSample = 0, uploadedSrc = null;
+
+/* ── SAMPLE SELECT ── */
+function selectSample(i, el) {
+  curSample = i;
+  uploadedSrc = null;
+  document.querySelectorAll('.sample').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('upreview').classList.remove('show');
+  document.getElementById('uz').style.display = '';
+}
+
+/* ── FILE UPLOAD ── */
+function handleFile(e) { if (e.target.files[0]) loadPhoto(e.target.files[0]); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uz').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadPhoto(f);
+}
+function loadPhoto(file) {
+  const r = new FileReader();
+  r.onload = ev => {
+    uploadedSrc = ev.target.result;
+    document.getElementById('upreview-img').src = uploadedSrc;
+    document.getElementById('upreview').classList.add('show');
+    document.getElementById('uz').style.display = 'none';
+    document.querySelectorAll('.sample').forEach(s => s.classList.remove('active'));
+  };
+  r.readAsDataURL(file);
+}
+
+/* ── START ── */
+function iniciarGeracao() {
+  show('screenLoading');
+
+  // reset tags
+  ['t1','t2','t3','t4'].forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById('progFill').style.width = '0';
+
+  const DURATION = 4000;
+  const start = performance.now();
+
+  function tick(now) {
+    const pct = Math.min((now - start) / DURATION * 100, 100);
+    document.getElementById('progFill').style.width = pct + '%';
+
+    const si = Math.min(Math.floor(pct / 17), STEPS.length - 1);
+    const [stepText, tagId] = STEPS[si];
+    document.getElementById('loadingStep').textContent = stepText;
+
+    // light up tags sequentially
+    ['t1','t2','t3','t4'].forEach((id, i) => {
+      if (pct >= i * 25) document.getElementById(id).classList.add('on');
+    });
+
+    if (pct < 100) requestAnimationFrame(tick);
+    else setTimeout(mostrarResultado, 200);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ── RESULT ── */
+function mostrarResultado() {
+  const data = SAMPLES[curSample];
+  const beforeSrc = uploadedSrc || data.before;
+  const afterSrc  = data.after;
+
+  document.getElementById('imgBefore').src = beforeSrc;
+  document.getElementById('imgAfter').src  = afterSrc;
+
+  // metrics
+  const [ctr, conv, score] = METRICS[curSample % METRICS.length];
+  document.querySelector('#m1 .metric-val').textContent = ctr;
+  document.querySelector('#m2 .metric-val').textContent = conv;
+  document.querySelector('#m3 .metric-val').textContent = score;
+
+  show('screenResult');
+  setSlider(50);
+  initDrag();
+
+  // animate metrics in
+  setTimeout(() => {
+    ['m1','m2','m3'].forEach(id => document.getElementById(id).classList.add('on'));
+  }, 300);
+}
+
+/* ── BACK ── */
+function voltarUpload() {
+  ['m1','m2','m3'].forEach(id => document.getElementById(id).classList.remove('on'));
+  show('screenUpload');
+}
+
+/* ── SLIDER ── */
+let dragging = false;
+function setSlider(pct) {
+  document.getElementById('cmpHandle').style.left = pct + '%';
+  document.getElementById('cmpBefore').style.clipPath = `inset(0 ${100-pct}% 0 0)`;
+  document.getElementById('cmpHint').style.opacity = pct > 10 && pct < 90 ? '1' : '0';
+}
+function initDrag() {
+  const wrap = document.getElementById('compareInner');
+  const getX = e => e.touches ? e.touches[0].clientX : e.clientX;
+  wrap.onmousedown = wrap.ontouchstart = () => dragging = true;
+  wrap.onmousemove = wrap.ontouchmove = e => {
+    if (!dragging) return;
+    e.preventDefault();
+    const rect = wrap.getBoundingClientRect();
+    const pct = Math.max(2, Math.min(98, (getX(e) - rect.left) / rect.width * 100));
+    setSlider(pct);
+  };
+  document.onmouseup = document.ontouchend = () => dragging = false;
+}
+
+/* ── SCREEN SWITCH ── */
+function show(id) {
+  ['screenUpload','screenLoading','screenResult'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = s === id ? 'flex' : 'none';
+  });
+}
+
+/* ── TOAST ── */
+let tt;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
