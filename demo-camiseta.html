@@ -468,12 +468,12 @@ const PRODUCTS = [
   {
     name: "Camiseta Agentic Commerce",
     thumb: "images/camiseta-agentic-commerce.png",
-    prompt: "A person wearing a white t-shirt with 'Agentic Commerce' tech branding, modern lifestyle photo, clean background, fashion catalog style, high quality, photorealistic"
+    prompt: "Camiseta Agentic Commerce"
   },
   {
     name: "Camiseta Rede Neural",
     thumb: "images/camiseta-rede-neural.png",
-    prompt: "A person wearing a black t-shirt with neural network graphic design, modern streetwear style, fashion catalog photo, clean background, high quality, photorealistic"
+    prompt: "Camiseta Rede Neural"
   },
 ];
 
@@ -600,58 +600,111 @@ function chamadaMock() {
   }, 3500);
 }
 
+/* ── HELPER: converte src de imagem para base64 data URI ── */
+async function srcToBase64(src) {
+  // Se já é data URI (upload do usuário), retorna direto
+  if (src.startsWith('data:')) return src;
+  // Caso contrário (imagem local/remota), busca e converte via canvas
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Falha ao carregar imagem: ' + src));
+    img.src = src;
+  });
+}
+
 /* ── API REPLICATE ── */
 async function chamadaReplicate() {
   const produto = PRODUCTS[selectedProduct];
-
-  // Monta prompt enriquecido com a foto do usuário como contexto visual
-  const promptFinal = `Virtual try-on fashion photo. ${produto.prompt}. Studio lighting, high resolution, 4K, fashion magazine quality.`;
+  const promptFinal = `Virtual try-on: keep the exact person from the second image (same face, skin tone, body, pose) and dress them in the exact garment from the first image (same color, print, texture, logo). The clothing must look naturally worn on the person's body, with realistic fabric draping, lighting and shadows. Preserve both the person's identity and the garment's original design completely. Fashion catalog photo, studio lighting, high resolution.`;
 
   try {
-    const body = {
-      input: {
-        prompt: promptFinal,
-        aspect_ratio: "3:4",
-        output_format: "png"
-      }
-    };
+    // Converte as duas imagens para base64
+    console.log('Convertendo imagens para base64…');
+    const [productBase64, userBase64] = await Promise.all([
+      srcToBase64(produto.thumb),
+      srcToBase64(userPhotoBase64)
+    ]);
+    console.log('Imagens prontas, chamando API…');
 
-    // Inclui a foto do usuário se o modelo aceitar (image-to-image)
-    if (userPhotoBase64) {
-      body.input.image = userPhotoBase64;
-    }
-
-    const res = await fetch('https://api.replicate.com/v1/models/google/nano-banana-pro/predictions', {
+    // 1. Cria a predição via proxy local (evita CORS)
+    const res = await fetch('http://localhost:3131/replicate', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${REPLICATE_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'wait'
-      },
-      body: JSON.stringify(body)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: REPLICATE_TOKEN,
+        path: '/v1/models/google/nano-banana-pro/predictions',
+        prefer: 'wait',
+        payload: {
+          input: {
+            prompt: promptFinal,
+            image_input: [productBase64, userBase64],
+            aspect_ratio: "3:4",
+            output_format: "png",
+            safety_filter_level: "block_only_high",
+            allow_fallback_model: false
+          }
+        }
+      })
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || `HTTP ${res.status}`);
+      const errBody = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errBody}`);
     }
 
-    const data = await res.json();
+    let data = await res.json();
+    console.log('Replicate response:', data);
 
-    // Replicate retorna output como string ou array de strings
+    // 2. Se ainda estiver processando, faz polling até terminar
+    if (data.status !== 'succeeded' && data.urls?.get) {
+      data = await pollPrediction(data.urls.get);
+    }
+
+    if (data.status === 'failed') {
+      throw new Error('Predição falhou: ' + (data.error || 'sem detalhe'));
+    }
+
     const output = data.output;
-    const imageUrl = Array.isArray(output) ? output[0] : output;
+    const imageUrl = Array.isArray(output) ? output[0] : (typeof output === 'object' ? output?.url?.() ?? output : output);
+    if (!imageUrl) throw new Error('Output vazio na resposta da API');
 
-    if (!imageUrl) throw new Error('Sem imagem no retorno da API');
+    console.log('Image URL from Replicate:', imageUrl);
 
-    apiResult = imageUrl;
+    // Baixa a imagem via proxy para evitar CORS / expiração de CDN
+    const imgRes  = await fetch(`http://localhost:3131/image?url=${encodeURIComponent(imageUrl)}`);
+    const imgData = await imgRes.json();
+    if (!imgData.dataUri) throw new Error('Falha ao baixar imagem: ' + (imgData.error || '?'));
+
+    apiResult = imgData.dataUri;
 
   } catch (err) {
     console.error('Replicate error:', err);
-    showToast('⚠️ Erro na API: ' + err.message + ' — usando resultado mockado');
-    // Fallback para mock em caso de erro
+    showToast('⚠️ ' + err.message + ' — usando resultado mockado');
     apiResult = 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800&h=1000&fit=crop';
   }
+}
+
+async function pollPrediction(url, maxAttempts = 30) {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(r => setTimeout(r, 1500));
+    const res = await fetch('http://localhost:3131/replicate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: REPLICATE_TOKEN, path: url.replace('https://api.replicate.com',''), payload: null })
+    });
+    const data = await res.json();
+    console.log(`Poll ${i+1}:`, data.status);
+    if (data.status === 'succeeded' || data.status === 'failed') return data;
+  }
+  throw new Error('Timeout aguardando resposta da API');
 }
 
 /* ── RESULT ── */
