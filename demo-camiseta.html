@@ -512,7 +512,7 @@ main{
 </style>
 
 <!-- TOKEN MODAL -->
-<div class="token-modal-overlay" id="tokenModal">
+<div class="token-modal-overlay" id="tokenModal" style="display:none">
   <div class="token-modal">
     <h2>🔑 Replicate API Token</h2>
     <p>Para gerar a imagem real com o modelo <strong style="color:#e8193c">google/nano-banana-pro</strong>, insira seu token da API do Replicate.</p>
@@ -550,12 +550,15 @@ const STEPS = [
   ['Finalizando imagem…',             't4'],
 ];
 
-/* ── TOKEN — lê da URL (?token=r8_xxx) ou do modal ── */
+/* ── TOKEN — lê da URL (?token=r8_xxx) ou exibe modal ── */
 (function() {
   const t = new URLSearchParams(window.location.search).get('token');
   if (t) {
     REPLICATE_TOKEN = t;
-    document.getElementById('tokenModal').remove();
+    // token na URL: modal nem aparece
+  } else {
+    // sem token: mostra modal
+    document.getElementById('tokenModal').style.display = 'flex';
   }
 })();
 
@@ -563,12 +566,12 @@ function confirmarToken() {
   const val = document.getElementById('tokenInput').value.trim();
   if (!val) { showToast('⚠️ Insira o token antes de continuar'); return; }
   REPLICATE_TOKEN = val;
-  document.getElementById('tokenModal').remove();
+  document.getElementById('tokenModal').style.display = 'none';
 }
 
 function usarMockado() {
   useMock = true;
-  document.getElementById('tokenModal').remove();
+  document.getElementById('tokenModal').style.display = 'none';
 }
 
 /* ── PRODUCT SELECTION ── */
