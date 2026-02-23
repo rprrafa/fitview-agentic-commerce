@@ -777,8 +777,6 @@ async function pollPrediction(url, maxAttempts = 30) {
 }
 
 /* ── RESULT ── */
-let lastError = null;
-
 function mostrarResultado() {
   if (!apiResult && !lastError) return; // aguarda API ainda
 
