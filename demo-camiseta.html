@@ -635,7 +635,7 @@ async function chamadaReplicate() {
     console.log('Imagens prontas, chamando API…');
 
     // 1. Cria a predição via proxy local (evita CORS)
-    const res = await fetch('http://localhost:3131/replicate', {
+    const res = await fetch('https://fitview-agentic-commerce-server.onrender.com/replicate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -679,7 +679,7 @@ async function chamadaReplicate() {
     console.log('Image URL from Replicate:', imageUrl);
 
     // Baixa a imagem via proxy para evitar CORS / expiração de CDN
-    const imgRes  = await fetch(`http://localhost:3131/image?url=${encodeURIComponent(imageUrl)}`);
+    const imgRes  = await fetch(`https://fitview-agentic-commerce-server.onrender.com/image?url=${encodeURIComponent(imageUrl)}`);
     const imgData = await imgRes.json();
     if (!imgData.dataUri) throw new Error('Falha ao baixar imagem: ' + (imgData.error || '?'));
 
@@ -695,7 +695,7 @@ async function chamadaReplicate() {
 async function pollPrediction(url, maxAttempts = 30) {
   for (let i = 0; i < maxAttempts; i++) {
     await new Promise(r => setTimeout(r, 1500));
-    const res = await fetch('http://localhost:3131/replicate', {
+    const res = await fetch('https://fitview-agentic-commerce-server.onrender.com/replicate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: REPLICATE_TOKEN, path: url.replace('https://api.replicate.com',''), payload: null })
