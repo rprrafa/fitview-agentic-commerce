@@ -692,7 +692,7 @@ async function srcToBase64(src) {
 /* ── API REPLICATE ── */
 async function chamadaReplicate() {
   const produto = PRODUCTS[selectedProduct];
-  const promptFinal = `Virtual try-on: keep the exact person from the second image (same face, skin tone, body, pose) and dress them in the exact garment from the first image (same color, print, texture, logo). The clothing must look naturally worn on the person's body, with realistic fabric draping, lighting and shadows. Preserve both the person's identity and the garment's original design completely. Fashion catalog photo, studio lighting, high resolution.`;
+  const promptFinal = `Virtual try-on fashion photo. Use the second image as the person reference — preserve every detail of their appearance: exact face, facial features, skin tone, hair color and style, body shape, and pose. Do not alter, idealize or replace the person's face or body in any way. Use the first image as the garment reference — dress the person in that exact piece of clothing, preserving its color, print, texture, logo and fit. The garment must look naturally worn with realistic draping, wrinkles and shadows. The final result must be photorealistic, with studio lighting and fashion catalog quality. Identity preservation is the top priority.`;
 
   try {
     // Converte as duas imagens para base64
